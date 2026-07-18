@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SkillOPT{% endblock %} | SkillOPT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand-group">
+        <a class="brand" href="{{ url_for('index') }}">
+          <span>Skill</span>OPT
+        </a>
+        {% if session.user_id %}
+          <button class="profile-bubble" type="button" onclick="toggleDrawer(true)" title="Open account drawer">
+            {{ session.avatar_letter }}
+          </button>
+        {% endif %}
+      </div>
+      <nav class="nav-links">
+        {% if not session.user_id %}
+          <a href="{{ url_for('jobs') }}">Jobs</a>
+          <a href="{{ url_for('freelancers') }}">Freelancers</a>
+        {% endif %}
+      </nav>
+      <div class="topbar-actions">
+        {% if session.user_id and session.user_role == 'client' %}
+          <a class="btn btn-primary btn-sm" href="{{ url_for('new_job') }}">Post a Job</a>
+        {% endif %}
+        {% if session.user_id %}
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('login') }}">Login</a>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('register') }}">Join Free</a>
+        {% endif %}
+      </div>
+      <button class="menu-toggle" type="button" onclick="toggleMenu()">Menu</button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="{{ url_for('jobs') }}">Jobs</a>
+      <a href="{{ url_for('freelancers') }}">Freelancers</a>
+      {% if session.user_id %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('messages') }}">Messages</a>
+        {% if session.user_role == 'client' %}
+          <a href="{{ url_for('new_job') }}">Post a Job</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Join Free</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if session.user_id %}
+    <div class="drawer-backdrop" id="drawerBackdrop" onclick="toggleDrawer(false)"></div>
+    <aside class="account-drawer" id="accountDrawer" aria-label="Account drawer">
+      <div class="drawer-head">
+        <div class="client-info">
+          <div class="avatar avatar-lg">{{ session.avatar_letter }}</div>
+          <div>
+            <div class="drawer-name">{{ session.user_name }}</div>
+            <div class="subtle">{{ session.user_role|title }}</div>
+          </div>
+        </div>
+        <button class="drawer-close" type="button" onclick="toggleDrawer(false)">×</button>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-label">Quick actions</div>
+        <div class="drawer-links">
+          <a href="{{ url_for('profile', user_id=session.user_id) }}">View profile</a>
+          <a href="{{ url_for('settings') }}">Edit account</a>
+          <a href="{{ url_for('messages') }}">Messages</a>
+          {% if session.user_role == 'client' %}
+            <a href="{{ url_for('new_job') }}">Post job</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-label">Account</div>
+        <div class="drawer-links">
+          <a href="{{ url_for('settings') }}">Settings</a>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+
+      <div class="drawer-note">
+        Use the settings page for email, phone, password, and profile edits.
+      </div>
+    </aside>
+  {% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="shell flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="shell app-shell">
+    {% if session.user_id %}
+      <aside class="left-rail" aria-label="Primary navigation">
+        <div class="left-rail-profile">
+          <button class="rail-avatar" type="button" onclick="toggleDrawer(true)" title="Open account drawer">
+            {{ session.avatar_letter }}
+          </button>
+          <div>
+            <div class="rail-name">{{ session.user_name }}</div>
+            <div class="subtle">{{ session.user_role|title }}</div>
+          </div>
+        </div>
+        <div class="left-rail-links">
+          <a href="{{ url_for('jobs') }}">Jobs</a>
+          <a href="{{ url_for('profile', user_id=session.user_id) }}">Profile</a>
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('messages') }}">Messages</a>
+          {% if session.user_role == 'client' %}
+            <a href="{{ url_for('new_job') }}">Post a Job</a>
+          {% endif %}
+        </div>
+      </aside>
+    {% endif %}
+
+    <main class="workspace-main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="shell footer-inner">
+      <div>
+        <div class="brand footer-brand"><span>Skill</span>OPT</div>
+        <p class="muted">A freelance marketplace for jobs, proposals, and messages.</p>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('jobs') }}">Browse Jobs</a>
+        <a href="{{ url_for('freelancers') }}">Top Freelancers</a>
+        {% if session.user_id and session.user_role == 'client' %}
+          <a href="{{ url_for('new_job') }}">Post a Job</a>
+        {% endif %}
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

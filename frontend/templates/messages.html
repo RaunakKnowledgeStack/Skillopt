@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<section class="shell messages-layout">
+  <aside class="sidebar-card">
+    <h1 class="section-title">Messages</h1>
+    <div class="contact-list" style="margin-top:16px;">
+      {% for c in contacts %}
+        <a class="contact-item" href="{{ url_for('chat', other_id=c.other_id) }}">
+          <div class="client-info">
+            <div class="avatar avatar-sm">{{ c.avatar_letter }}</div>
+            <div>
+              <div class="contact-name">{{ c.name }}</div>
+              <div class="contact-role">{{ c.role }}</div>
+            </div>
+          </div>
+          {% if c.unread and c.unread > 0 %}
+            <span class="unread-dot"></span>
+          {% endif %}
+        </a>
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">Chat</div>
+          <p>No conversations yet.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </aside>
+  <div class="card empty-state">
+    <div class="icon">Message</div>
+    <h3>Select a conversation</h3>
+    <p>Open a chat from the left panel to continue the conversation.</p>
+  </div>
+</section>
+{% endblock %}

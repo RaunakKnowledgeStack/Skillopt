@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<section class="form-card">
+  <div class="card form-shell">
+    <h1 class="form-title">Welcome back</h1>
+    <p class="form-sub">Sign in to manage jobs, proposals, and messages.</p>
+    <form method="post">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" required />
+      </div>
+      <div class="action-row" style="justify-content:space-between;align-items:center;">
+        <button class="btn btn-primary btn-sm" type="submit">Login</button>
+        <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
+      </div>
+    </form>
+    <p class="form-sub" style="margin-top:16px;">No account yet? <a href="{{ url_for('register') }}">Create one</a></p>
+  </div>
+</section>
+{% endblock %}

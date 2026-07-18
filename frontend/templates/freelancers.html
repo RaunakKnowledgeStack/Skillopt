@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Freelancers{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div class="shell page-header-inner">
+    <div>
+      <h1 class="page-title">Freelancers</h1>
+      <div class="subtle">Find verified talent and compare profiles.</div>
+    </div>
+  </div>
+</section>
+
+<section class="shell section">
+  <form class="filters" method="get" style="grid-template-columns:1fr auto;">
+    <div class="filter-group">
+      <label for="q">Search</label>
+      <input id="q" name="q" value="{{ search }}" placeholder="Search by name or skill" />
+    </div>
+    <button class="btn btn-primary btn-sm" type="submit">Search</button>
+  </form>
+
+  {% if freelancers %}
+    <div class="freelancer-grid">
+      {% for f in freelancers %}
+        <article class="card">
+          <div class="profile-header">
+            <div class="client-info">
+              <div class="avatar avatar-lg">{{ f.avatar_letter }}</div>
+              <div>
+                <h3 class="job-title" style="margin:0;">{{ f.name }}</h3>
+                <div class="subtle">{{ f.role|title }}</div>
+              </div>
+            </div>
+            <span class="badge badge-open">{{ '%.1f'|format(f.avg_rating) }} rating</span>
+          </div>
+          <p class="profile-bio">{{ f.bio }}</p>
+          <div class="tags">
+            {% for skill in f.skills.split(',')[:4] if f.skills %}
+              <span class="tag">{{ skill.strip() }}</span>
+            {% endfor %}
+          </div>
+          <div class="profile-meta">
+            <span class="pill">{{ f.review_count }} reviews</span>
+            <span class="pill">{{ f.proposal_count }} wins</span>
+          </div>
+          <div class="action-row" style="margin-top:16px;">
+            <a class="btn btn-primary btn-sm" href="{{ url_for('profile', user_id=f.id) }}">View profile</a>
+            {% if session.user_id %}
+              <a class="btn btn-ghost btn-sm" href="{{ url_for('chat', other_id=f.id) }}">Message</a>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card empty-state">
+      <div class="icon">Freelancers</div>
+      <h3>No freelancers found</h3>
+      <p>Try a different keyword or skill.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

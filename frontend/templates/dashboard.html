@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div class="shell page-header-inner">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <div class="subtle">Welcome back, {{ session.user_name }}</div>
+    </div>
+    <div class="action-row">
+      {% if role == 'client' %}
+        <a class="btn btn-primary btn-sm" href="{{ url_for('new_job') }}">Post a Job</a>
+      {% else %}
+        <a class="btn btn-primary btn-sm" href="{{ url_for('jobs') }}">Browse Jobs</a>
+      {% endif %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('profile', user_id=session.user_id) }}">View Profile</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="dashboard-main">
+    <div class="stats-row">
+      {% if role == 'client' %}
+        <div class="stat-card"><div class="subtle">Jobs posted</div><div class="num">{{ data.my_jobs|length }}</div></div>
+        <div class="stat-card"><div class="subtle">Total proposals</div><div class="num">{{ data.total_proposals }}</div></div>
+        <div class="stat-card"><div class="subtle">Active projects</div><div class="num">{{ data.my_jobs|selectattr('status','eq','in_progress')|list|length }}</div></div>
+        <div class="stat-card"><div class="subtle">Unread messages</div><div class="num">{{ data.unread_messages }}</div></div>
+      {% else %}
+        <div class="stat-card"><div class="subtle">Proposals sent</div><div class="num">{{ data.my_proposals|length }}</div></div>
+        <div class="stat-card"><div class="subtle">Accepted</div><div class="num">{{ data.my_proposals|selectattr('status','eq','accepted')|list|length }}</div></div>
+        <div class="stat-card"><div class="subtle">Open jobs</div><div class="num">{{ data.open_jobs }}</div></div>
+        <div class="stat-card"><div class="subtle">Unread messages</div><div class="num">{{ data.unread_messages }}</div></div>
+      {% endif %}
+    </div>
+
+    {% if role == 'client' %}
+      <div class="table-card">
+        <div class="table-header">
+          <h2 class="section-title">Your job postings</h2>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('new_job') }}">New Job</a>
+        </div>
+        {% if data.my_jobs %}
+          <table>
+            <thead>
+              <tr>
+                <th>Job</th>
+                <th>Category</th>
+                <th>Budget</th>
+                <th>Status</th>
+                <th>Proposals</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in data.my_jobs %}
+                <tr>
+                  <td><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></td>
+                  <td>{{ job.category }}</td>
+                  <td>${{ job.budget_min|int }} - ${{ job.budget_max|int }}</td>
+                  <td>
+                    {% if job.status == 'open' %}
+                      <span class="badge badge-open">Open</span>
+                    {% elif job.status == 'in_progress' %}
+                      <span class="badge badge-progress">In progress</span>
+                    {% else %}
+                      <span class="badge badge-closed">Closed</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ job.proposal_count }}</td>
+                  <td><a class="btn btn-ghost btn-sm" href="{{ url_for('job_detail', job_id=job.id) }}">Open</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="empty-state">
+            <div class="icon">Jobs</div>
+            <h3>No jobs posted yet</h3>
+            <p>Start with a job brief and invite the right freelancers.</p>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="table-card">
+        <div class="table-header">
+          <h2 class="section-title">Your proposals</h2>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('jobs') }}">Browse Jobs</a>
+        </div>
+        {% if data.my_proposals %}
+          <table>
+            <thead>
+              <tr>
+                <th>Job</th>
+                <th>Client</th>
+                <th>Bid</th>
+                <th>Budget</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in data.my_proposals %}
+                <tr>
+                  <td><a href="{{ url_for('job_detail', job_id=p.job_id) }}">{{ p.title }}</a></td>
+                  <td>{{ p.client_name }}</td>
+                  <td>${{ p.bid_amount|int }}</td>
+                  <td>${{ p.budget_min|int }} - ${{ p.budget_max|int }}</td>
+                  <td>
+                    {% if p.status == 'pending' %}
+                      <span class="badge badge-pending">Pending</span>
+                    {% elif p.status == 'accepted' %}
+                      <span class="badge badge-accepted">Accepted</span>
+                    {% else %}
+                      <span class="badge badge-rejected">Rejected</span>
+                    {% endif %}
+                  </td>
+                  <td><a class="btn btn-ghost btn-sm" href="{{ url_for('job_detail', job_id=p.job_id) }}">Open</a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="empty-state">
+            <div class="icon">Apply</div>
+            <h3>No proposals yet</h3>
+            <p>Start applying to jobs to build your profile and reputation.</p>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

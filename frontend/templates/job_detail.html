@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }}{% endblock %}
+{% block content %}
+<section class="shell job-detail-layout grid-2">
+  <div>
+    <div class="action-row" style="margin-bottom:16px;">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('jobs') }}">Back to jobs</a>
+      {% if session.user_id and session.user_role == 'freelancer' and job.status == 'open' %}
+        <a class="btn btn-primary btn-sm" href="#apply">Apply now</a>
+      {% endif %}
+    </div>
+
+    <article class="card">
+      <div class="job-card-header">
+        <div>
+          <h1 class="page-title" style="margin:0 0 8px;">{{ job.title }}</h1>
+          <div class="job-meta">
+            <span>{{ job.client_name }}</span>
+            <span>Posted {{ job.created_at[:10] }}</span>
+            <span>{{ job.category }}</span>
+            {% if job.status == 'open' %}
+              <span class="badge badge-open">Open</span>
+            {% elif job.status == 'in_progress' %}
+              <span class="badge badge-progress">In progress</span>
+            {% else %}
+              <span class="badge badge-closed">Closed</span>
+            {% endif %}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="analysis-score">${{ job.budget_min|int }} - ${{ job.budget_max|int }}</div>
+          <div class="subtle">Budget range</div>
+        </div>
+      </div>
+
+      <div class="analysis-section">
+        <h3 class="section-title" style="font-size:1.05rem;">Description</h3>
+        <p class="job-body">{{ job.description }}</p>
+      </div>
+
+      {% if job.skills_required %}
+        <div class="analysis-section">
+          <h3 class="section-title" style="font-size:1.05rem;">Required skills</h3>
+          <div class="tags">
+            {% for skill in job.skills_required.split(',') %}
+              <span class="skill-chip">{{ skill.strip() }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="card assistant-card" style="margin-top:18px;">
+      <div class="analysis-head">
+        <div>
+          <h2 class="section-title">Assistant</h2>
+          <p class="muted" style="margin-top:6px;">Ask about the job, your fit, or what to improve.</p>
+        </div>
+        {% if session.user_id %}
+          <span class="badge badge-open">Ready</span>
+        {% endif %}
+      </div>
+
+      {% if session.user_id %}
+        <div class="assistant-presets">
+          <button type="button" class="btn btn-ghost btn-sm preset-btn">What skills matter most?</button>
+          <button type="button" class="btn btn-ghost btn-sm preset-btn">How should I apply?</button>
+          <button type="button" class="btn btn-ghost btn-sm preset-btn">What should I learn?</button>
+        </div>
+
+        <div class="assistant-chat" id="assistantChat" data-user-avatar="{{ session.avatar_letter if session.user_id else 'U' }}">
+          <div class="assistant-msg bot">
+            <div class="avatar avatar-sm">A</div>
+            <div class="msg-bubble">
+              I can help with this job. Ask me anything about fit, skills, learning, or your proposal.
+            </div>
+          </div>
+        </div>
+
+        <form class="assistant-form" id="assistantForm" data-assistant-url="{{ url_for('job_assistant_api', job_id=job.id) }}">
+          <textarea id="assistantInput" placeholder="Type your question..." rows="3" required></textarea>
+          <div class="action-row" style="justify-content:flex-end;">
+            <button class="btn btn-primary btn-sm" type="submit">Send</button>
+          </div>
+        </form>
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">Chat</div>
+          <h3>Sign in to use the assistant</h3>
+          <p>The assistant uses your profile and this job to answer.</p>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('login') }}">Login</a>
+        </div>
+      {% endif %}
+    </article>
+
+    {% if proposals %}
+      <section style="margin-top:22px;">
+        <div class="section-header">
+          <h2 class="section-title">{{ proposals|length }} proposal{{ 's' if proposals|length != 1 else '' }}</h2>
+        </div>
+        {% for p in proposals %}
+          <article class="proposal-card">
+            <div class="proposal-header">
+              <div class="client-info">
+                <div class="avatar avatar-sm">{{ p.avatar_letter }}</div>
+                <div>
+                  <strong>{{ p.name }}</strong>
+                  <div class="subtle">{{ p.skills }}</div>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="budget">${{ p.bid_amount|int }}</div>
+                <span class="badge badge-{{ p.status }}">{{ p.status|title }}</span>
+              </div>
+            </div>
+            <p class="proposal-letter">{{ p.cover_letter }}</p>
+            <div class="action-row">
+              {% if p.status == 'pending' %}
+                <a class="btn btn-success btn-sm" href="{{ url_for('update_proposal', proposal_id=p.id, action='accepted') }}">Accept</a>
+                <a class="btn btn-danger btn-sm" href="{{ url_for('update_proposal', proposal_id=p.id, action='rejected') }}">Reject</a>
+              {% endif %}
+              <a class="btn btn-ghost btn-sm" href="{{ url_for('profile', user_id=p.freelancer_id) }}">Profile</a>
+              <a class="btn btn-ghost btn-sm" href="{{ url_for('chat', other_id=p.freelancer_id) }}">Message</a>
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% if session.user_id and session.user_role == 'freelancer' and job.status == 'open' %}
+      <article class="card" id="apply" style="margin-top:22px;">
+        <h2 class="section-title">Submit proposal</h2>
+        {% if user_proposal %}
+          <div class="proposal-card">
+            <div class="proposal-header">
+              <strong>Your bid: ${{ user_proposal.bid_amount|int }}</strong>
+              <span class="badge badge-{{ user_proposal.status }}">{{ user_proposal.status|title }}</span>
+            </div>
+            <p class="proposal-letter">{{ user_proposal.cover_letter }}</p>
+          </div>
+          <p class="subtle">You have already submitted a proposal for this job.</p>
+        {% else %}
+          <form method="post" action="{{ url_for('submit_proposal', job_id=job.id) }}">
+            <div class="form-group">
+              <label for="bid_amount">Bid amount</label>
+              <input id="bid_amount" type="number" name="bid_amount" min="{{ job.budget_min }}" max="{{ job.budget_max * 1.5 }}" step="0.01" placeholder="{{ ((job.budget_min + job.budget_max) / 2)|int }}" required />
+            </div>
+            <div class="form-group">
+              <label for="cover_letter">Cover letter</label>
+              <textarea id="cover_letter" name="cover_letter" placeholder="Explain your fit, timeline, and approach." required></textarea>
+            </div>
+            <button class="btn btn-primary btn-sm" type="submit">Send proposal</button>
+          </form>
+        {% endif %}
+      </article>
+    {% endif %}
+
+    {% if not session.user_id %}
+      <article class="card" style="margin-top:22px;">
+        <h2 class="section-title">Apply for this job</h2>
+        <p class="muted">Sign in to submit a proposal and message the client.</p>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('login') }}">Login</a>
+      </article>
+    {% endif %}
+  </div>
+
+  <aside>
+    <article class="sidebar-card">
+      <div class="profile-header">
+        <div class="client-info">
+          <div class="avatar">{{ job.avatar_letter }}</div>
+          <div>
+            <strong>{{ job.client_name }}</strong>
+            <div class="subtle">Client</div>
+          </div>
+        </div>
+        {% if session.user_id %}
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('chat', other_id=job.client_id) }}">Message</a>
+        {% endif %}
+      </div>
+      <p class="profile-bio">{{ job.client_bio }}</p>
+      <div class="profile-meta">
+        <span class="pill">Category: {{ job.category }}</span>
+        <span class="pill">{{ job.status|replace('_', ' ')|title }}</span>
+      </div>
+    </article>
+
+    <article class="sidebar-card">
+      <h3 class="section-title" style="font-size:1rem;">Quick summary</h3>
+      <div class="mini-stack">
+        <div class="mini-item"><span>Budget</span><strong>${{ job.budget_min|int }} - ${{ job.budget_max|int }}</strong></div>
+        <div class="mini-item"><span>Posted</span><strong>{{ job.created_at[:10] }}</strong></div>
+        <div class="mini-item"><span>Skills</span><strong>{{ job.skills_required.split(',')|length if job.skills_required else 0 }}</strong></div>
+      </div>
+    </article>
+  </aside>
+</section>
+{% endblock %}

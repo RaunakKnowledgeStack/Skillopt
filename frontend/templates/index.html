@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="shell hero-grid">
+    <div class="hero-panel">
+      <span class="eyebrow">Clean freelance marketplace</span>
+      <h1>Right Skill <span class="accent">,Right time</span> with Right asset.</h1>
+      <p class="hero-sub">Browse jobs, review proposals, and use the assistant for focused help.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('jobs') }}">Browse Jobs</a>
+        <a class="btn btn-ghost btn-lg" href="{{ url_for('freelancers') }}">Explore Freelancers</a>
+        {% if not session.user_id %}
+          <a class="btn btn-secondary btn-lg" href="{{ url_for('register') }}">Create Account</a>
+        {% endif %}
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="num">{{ stats.jobs }}</div><div class="lbl">Open jobs</div></div>
+        <div class="hero-stat"><div class="num">{{ stats.freelancers }}</div><div class="lbl">Freelancers</div></div>
+        <div class="hero-stat"><div class="num">{{ stats.clients }}</div><div class="lbl">Clients</div></div>
+        <div class="hero-stat"><div class="num">AI</div><div class="lbl">Assistant</div></div>
+      </div>
+    </div>
+
+    <div class="hero-side">
+      <div class="hero-panel hero-side-card">
+        <div class="page-title">Get started</div>
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="pill">1</div>
+            <div>
+              <strong>Browse jobs</strong>
+              <p>Find opportunities with clean list and card layouts.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="pill">2</div>
+            <div>
+              <strong>Open a job page</strong>
+              <p>Read the brief, budget, and client details first.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="pill">3</div>
+            <div>
+              <strong>Use the assistant</strong>
+              <p>Open a job and ask a direct question.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="section-header">
+      <h2 class="section-title">Browse by category</h2>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('jobs') }}">View all jobs</a>
+    </div>
+    <div class="jobs-grid">
+      {% for cat in ['Backend Development', 'Frontend Development', 'Design', 'Data & Analytics', 'Web Design', 'Mobile'] %}
+        <a class="card" href="{{ url_for('jobs', category=cat) }}">
+          <div class="job-badge">{{ cat }}</div>
+          <h3 class="job-title" style="margin-top:12px;">{{ cat }}</h3>
+          <p class="job-desc">Explore jobs in {{ cat.lower() }} and compare listings instantly.</p>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="section-header">
+      <h2 class="section-title">Latest jobs</h2>
+      <a class="btn btn-secondary btn-sm" href="{{ url_for('jobs') }}">See all</a>
+    </div>
+    <div class="jobs-grid">
+      {% for job in jobs %}
+        <article class="card job-card">
+          <div class="job-card-header">
+            <div>
+              <div class="job-title"><a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a></div>
+              <div class="job-meta">
+                <span>{{ job.client_name }}</span>
+                <span>{{ job.proposal_count }} proposals</span>
+              </div>
+            </div>
+            <span class="job-badge">{{ job.category }}</span>
+          </div>
+          <p class="job-desc">{{ job.description }}</p>
+          <div class="tags">
+            {% for skill in job.skills_required.split(',')[:3] if job.skills_required %}
+              <span class="tag">{{ skill.strip() }}</span>
+            {% endfor %}
+          </div>
+          <div class="job-footer">
+            <div class="client-info">
+              <div class="avatar avatar-sm">{{ job.avatar_letter }}</div>
+              <span>{{ job.client_name }}</span>
+            </div>
+            <div class="budget">${{ job.budget_min|int }} - ${{ job.budget_max|int }}</div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

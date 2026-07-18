@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Post Job{% endblock %}
+{% block content %}
+<section class="form-card">
+  <div class="card form-shell">
+    <h1 class="form-title">Post a new job</h1>
+    <p class="form-sub">Write a clear brief and the job page will generate AI learning recommendations automatically.</p>
+    <form method="post">
+      <div class="form-group">
+        <label for="title">Job title</label>
+        <input id="title" type="text" name="title" required />
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input id="category" type="text" name="category" placeholder="Backend Development" required />
+      </div>
+      <div class="budget-row">
+        <div class="form-group">
+          <label for="budget_min">Minimum budget</label>
+          <input id="budget_min" type="number" name="budget_min" min="0" required />
+        </div>
+        <div class="form-group">
+          <label for="budget_max">Maximum budget</label>
+          <input id="budget_max" type="number" name="budget_max" min="0" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="skills_required">Required skills</label>
+        <input id="skills_required" type="text" name="skills_required" placeholder="Python, FastAPI, PostgreSQL" />
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit">Publish job</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<section class="form-card">
+  <div class="card form-shell">
+    <h1 class="form-title">Edit profile</h1>
+    <p class="form-sub">Update your public bio and skill list.</p>
+    <form method="post">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input id="name" type="text" name="name" value="{{ user.name }}" required />
+      </div>
+      <div class="form-group">
+        <label for="bio">Bio</label>
+        <textarea id="bio" name="bio">{{ user.bio }}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="skills">Skills</label>
+        <input id="skills" type="text" name="skills" value="{{ user.skills }}" />
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit">Save changes</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

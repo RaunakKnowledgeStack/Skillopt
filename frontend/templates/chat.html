@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Chat with {{ other.name }}{% endblock %}
+{% block content %}
+<section class="shell messages-layout">
+  <aside class="sidebar-card">
+    <div class="client-info">
+      <div class="avatar">{{ other.avatar_letter }}</div>
+      <div>
+        <h1 class="section-title" style="margin:0;">{{ other.name }}</h1>
+        <div class="contact-role">{{ other.role }}</div>
+      </div>
+    </div>
+    <p class="profile-bio" style="margin-top:16px;">{{ other.bio }}</p>
+    <div class="tags">
+      {% for skill in other.skills.split(',')[:4] if other.skills %}
+        <span class="tag">{{ skill.strip() }}</span>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <article class="card chat-panel">
+    <div class="chat-header">
+      <div>
+        <h2 class="section-title" style="margin:0;">Conversation</h2>
+        <div class="subtle">Messages are synced to the current job workflow.</div>
+      </div>
+    </div>
+
+    <div class="chat-messages">
+      {% for m in msgs %}
+        <div class="msg {% if m.sender_id == session.user_id %}mine{% endif %}">
+          <div class="avatar avatar-sm">{{ m.avatar_letter }}</div>
+          <div class="msg-bubble">
+            <strong style="display:block;margin-bottom:6px;">{{ m.sender_name }}</strong>
+            <div>{{ m.content }}</div>
+            <div class="msg-time">{{ m.created_at[:16] }}</div>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">Chat</div>
+          <p>No messages yet. Send the first one.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <form class="chat-input-area" method="post">
+      <input type="text" name="content" placeholder="Write a message..." autocomplete="off" />
+      <button class="btn btn-primary btn-sm" type="submit">Send</button>
+    </form>
+  </article>
+</section>
+{% endblock %}

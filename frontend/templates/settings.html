@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<section class="shell profile-layout">
+  <article class="card profile-hero">
+    <div class="profile-header-card">
+      <div class="avatar avatar-lg">{{ user.avatar_letter }}</div>
+      <div class="profile-hero-copy">
+        <div class="eyebrow">Account</div>
+        <h1 class="page-title" style="margin:10px 0 8px;">{{ user.name }}</h1>
+        <p class="profile-bio">Edit profile, contact, and security.</p>
+        <div class="profile-meta">
+          <span class="pill">Public profile</span>
+          <span class="pill">Private email</span>
+          <span class="pill">Secure login</span>
+        </div>
+      </div>
+      <div class="action-row">
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('profile', user_id=user.id) }}">View profile</a>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">Logout</a>
+      </div>
+    </div>
+  </article>
+
+  <form method="post" class="settings-form">
+    <div class="grid-2" style="margin-top:18px;">
+      <article class="card">
+        <h2 class="section-title">Profile</h2>
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" value="{{ user.name }}" required />
+        </div>
+        <div class="form-group">
+          <label for="bio">Bio</label>
+          <textarea id="bio" name="bio" placeholder="Short public bio">{{ user.bio }}</textarea>
+        </div>
+        <div class="form-group">
+          <label for="skills">Skills</label>
+          <input id="skills" name="skills" type="text" value="{{ user.skills }}" placeholder="React, Python, Figma" />
+        </div>
+        <div class="form-group">
+          <label for="security_question">Security question</label>
+          <select id="security_question" name="security_question">
+            <option value="">Choose one</option>
+            <option value="What is your favorite color?" {% if user.security_question == 'What is your favorite color?' %}selected{% endif %}>What is your favorite color?</option>
+            <option value="What city were you born in?" {% if user.security_question == 'What city were you born in?' %}selected{% endif %}>What city were you born in?</option>
+            <option value="What was the name of your first pet?" {% if user.security_question == 'What was the name of your first pet?' %}selected{% endif %}>What was the name of your first pet?</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="security_answer">Security answer</label>
+          <input id="security_answer" name="security_answer" type="text" placeholder="Leave blank to keep current answer" />
+        </div>
+      </article>
+
+      <article class="card">
+        <h2 class="section-title">Contact</h2>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" value="{{ user.email }}" required />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="text" value="{{ user.phone if user.phone else '' }}" placeholder="+1 555 000 0000" />
+        </div>
+        <div class="analysis-section">
+          <h3 class="section-title" style="font-size:1rem;">Privacy</h3>
+          <p class="muted">Your public profile shows name, bio, skills, and reviews. Email stays private.</p>
+        </div>
+      </article>
+    </div>
+
+    <article class="card" style="margin-top:18px;">
+      <h2 class="section-title">Security</h2>
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="form-group">
+          <label for="password">New password</label>
+          <input id="password" name="password" type="password" placeholder="Leave blank to keep current password" />
+        </div>
+        <div class="analysis-section" style="border-top:none; padding-top:0;">
+          <h3 class="section-title" style="font-size:1rem;">Login</h3>
+          <p class="muted">Use logout when you finish on a shared device.</p>
+        </div>
+      </div>
+      <div class="action-row" style="margin-top:10px;">
+        <button class="btn btn-primary btn-sm" type="submit">Save</button>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">Logout</a>
+      </div>
+    </article>
+  </form>
+</section>
+{% endblock %}
