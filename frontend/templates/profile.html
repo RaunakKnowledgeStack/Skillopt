@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}{{ user.name }}{% endblock %}
+{% block content %}
+<section class="shell profile-layout">
+  <article class="card profile-hero">
+    <div class="profile-header-card">
+      <div class="avatar avatar-lg">{{ user.avatar_letter }}</div>
+      <div class="profile-hero-copy">
+        <div class="eyebrow">Public profile</div>
+        <h1 class="page-title" style="margin:10px 0 8px;">{{ user.name }}</h1>
+        <div class="profile-role">{{ user.role }}</div>
+        <p class="profile-bio">{{ user.bio if user.bio else 'No bio added yet.' }}</p>
+        <div class="profile-meta">
+          <span class="pill">{{ '%.1f'|format(avg_rating) }} avg rating</span>
+          <span class="pill">{{ reviews_count }} review{{ 's' if reviews_count != 1 else '' }}</span>
+          <span class="pill">Member since {{ user.created_at|format_date }}</span>
+        </div>
+      </div>
+      <div class="action-row">
+        {% if session.user_id and session.user_id == user.id %}
+          <a class="btn btn-primary btn-sm" href="{{ url_for('settings') }}">Edit profile</a>
+        {% elif session.user_id %}
+          <a class="btn btn-primary btn-sm" href="{{ url_for('chat', other_id=user.id) }}">Message</a>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+
+  <div class="stats-row" style="margin-top:18px;">
+    <div class="stat-card">
+      <div class="subtle">Role</div>
+      <div class="num" style="font-size:1.6rem;">{{ user.role|title }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="subtle">Completed</div>
+      <div class="num">{{ completed_count }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="subtle">Avg rating</div>
+      <div class="num">{{ '%.1f'|format(avg_rating) }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="subtle">Skills</div>
+      <div class="num">{{ user.skills.split(',')|length if user.skills else 0 }}</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top:18px;">
+    <article class="card">
+      <div class="section-header">
+        <h2 class="section-title">Skills</h2>
+      </div>
+      <div class="tags">
+        {% if user.skills %}
+          {% for skill in user.skills.split(',') %}
+            <span class="skill-chip">{{ skill.strip() }}</span>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <div class="icon">Leaf</div>
+            <p>No skills listed yet.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="analysis-section">
+        <h3 class="section-title" style="font-size:1rem;">Recent activity</h3>
+        <div class="feature-list">
+          {% for item in recent_items %}
+            <div class="feature-item">
+              <div class="pill">
+                {% if user.role == 'freelancer' %}
+                  Bid
+                {% else %}
+                  Job
+                {% endif %}
+              </div>
+              <div>
+                <strong>{{ item.title }}</strong>
+                <p>
+                  {% if user.role == 'freelancer' %}
+                    Bid ${{ item.bid_amount|int }} · {{ item.status|title }}
+                  {% else %}
+                    {% if item.status == 'open' %}Open job{% elif item.status == 'in_progress' %}In progress{% else %}Closed job{% endif %}
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <div class="icon">Work</div>
+              <p>No recent activity yet.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="section-header">
+        <h2 class="section-title">Reviews</h2>
+      </div>
+      <div class="feature-list">
+        {% for review in reviews %}
+          <div class="feature-item">
+            <div class="avatar avatar-sm">{{ review.avatar_letter }}</div>
+            <div>
+              <strong>{{ review.reviewer_name }}</strong>
+              <p>{{ review.comment if review.comment else 'No comment added.' }}</p>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="icon">Star</div>
+            <p>No reviews yet.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </article>
+  </div>
+</section>
+{% endblock %}
