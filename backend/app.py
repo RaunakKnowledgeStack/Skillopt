@@ -36,7 +36,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "freelaunch-dev-secret-2024")
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 DATABASE = os.path.join(INSTANCE_DIR, "freelance.db")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
 SECURITY_QUESTIONS = [
     "What is your favorite color?",
